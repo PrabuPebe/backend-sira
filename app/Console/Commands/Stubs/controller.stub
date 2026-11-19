@@ -1,0 +1,161 @@
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Http\Requests\{{modelName}}\Store{{modelName}}Request;
+use App\Http\Requests\{{modelName}}\Update{{modelName}}Request;
+use App\Services\Contracts\{{modelName}}ServiceInterface;
+use Illuminate\Http\JsonResponse;
+use OpenApi\Attributes as OA;
+
+#[OA\Tag(name: '{{modelName}}', description: 'API Endpoints for {{modelName}}')]
+class {{modelName}}Controller extends BaseApiController
+{
+    protected {{modelName}}ServiceInterface $service;
+
+    public function __construct({{modelName}}ServiceInterface $service)
+    {
+        $this->service = $service;
+    }
+
+    #[OA\Get(
+        path: '/{{routeSlug}}',
+        summary: 'Get all {{modelPluralLower}}',
+        tags: ['{{modelName}}'],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: '{{modelPluralLabel}} retrieved successfully',
+                content: new OA\JsonContent(ref: '#/components/schemas/ApiResponseList')
+            )
+        ]
+    )]
+    public function index(): JsonResponse
+    {
+        $data = $this->service->getAll();
+
+        return $this->getResponse($data, '{{modelPluralLabel}} retrieved successfully', 200);
+    }
+
+    #[OA\Post(
+        path: '/{{routeSlug}}',
+        summary: 'Create a new {{modelLower}}',
+        tags: ['{{modelName}}'],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                properties: [
+                    new OA\Property(property: 'name', type: 'string', example: 'Example Name')
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(
+                response: 201,
+                description: '{{modelLabel}} created successfully',
+                content: new OA\JsonContent(ref: '#/components/schemas/ApiResponsePost')
+            )
+        ]
+    )]
+    public function store(Store{{modelName}}Request $request): JsonResponse
+    {
+        $this->service->create($request->validated());
+
+        return $this->postResponse(null, '{{modelLabel}} created successfully', 201);
+    }
+
+    #[OA\Get(
+        path: '/{{routeSlug}}/{uuid}',
+        summary: 'Get {{modelLower}} by UUID',
+        tags: ['{{modelName}}'],
+        parameters: [
+            new OA\Parameter(
+                name: 'uuid',
+                in: 'path',
+                required: true,
+                description: '{{modelLabel}} UUID',
+                schema: new OA\Schema(type: 'string', format: 'uuid')
+            )
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: '{{modelLabel}} retrieved successfully',
+                content: new OA\JsonContent(ref: '#/components/schemas/ApiResponseItem')
+            ),
+            new OA\Response(response: 404, description: '{{modelLabel}} not found')
+        ]
+    )]
+    public function show(string $uuid): JsonResponse
+    {
+        $data = $this->service->getByUuid($uuid);
+
+        return $this->getResponse($data, '{{modelLabel}} retrieved successfully', 200);
+    }
+
+    #[OA\Put(
+        path: '/{{routeSlug}}/{uuid}',
+        summary: 'Update {{modelLower}} by UUID',
+        tags: ['{{modelName}}'],
+        parameters: [
+            new OA\Parameter(
+                name: 'uuid',
+                in: 'path',
+                required: true,
+                description: '{{modelLabel}} UUID',
+                schema: new OA\Schema(type: 'string', format: 'uuid')
+            )
+        ],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                properties: [
+                    new OA\Property(property: 'name', type: 'string', example: 'Updated Name')
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: '{{modelLabel}} updated successfully',
+                content: new OA\JsonContent(ref: '#/components/schemas/ApiResponsePut')
+            ),
+            new OA\Response(response: 404, description: '{{modelLabel}} not found')
+        ]
+    )]
+    public function update(Update{{modelName}}Request $request, string $uuid): JsonResponse
+    {
+        $this->service->update($uuid, $request->validated());
+
+        return $this->putResponse(null, '{{modelLabel}} updated successfully', 200);
+    }
+
+    #[OA\Delete(
+        path: '/{{routeSlug}}/{uuid}',
+        summary: 'Delete {{modelLower}} by UUID',
+        tags: ['{{modelName}}'],
+        parameters: [
+            new OA\Parameter(
+                name: 'uuid',
+                in: 'path',
+                required: true,
+                description: '{{modelLabel}} UUID',
+                schema: new OA\Schema(type: 'string', format: 'uuid')
+            )
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: '{{modelLabel}} deleted successfully',
+                content: new OA\JsonContent(ref: '#/components/schemas/ApiResponseDelete')
+            ),
+            new OA\Response(response: 404, description: '{{modelLabel}} not found')
+        ]
+    )]
+    public function destroy(string $uuid): JsonResponse
+    {
+        $this->service->delete($uuid);
+
+        return $this->deleteResponse('{{modelLabel}} deleted successfully', 204);
+    }
+}

@@ -1,0 +1,284 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Laravel N-Tier API Documentation",
+        "description": "Dokumentasi RESTful API Laravel dengan N-Tier Architecture (Controller -> Service -> Repository -> Model).",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "/api",
+            "description": "Local API Server"
+        }
+    ],
+    "paths": {
+        "/facilities": {
+            "get": {
+                "tags": [
+                    "Facility"
+                ],
+                "summary": "Get all facilities",
+                "operationId": "5c960ffe01ba8f28fba4dad7b2c1dc35",
+                "responses": {
+                    "200": {
+                        "description": "Facilities retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponseList"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Facility"
+                ],
+                "summary": "Create a new facility",
+                "operationId": "dfcf9bd32dc3a554a18e18f9fd01d615",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Example Name"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Facility created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponsePost"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/facilities/{uuid}": {
+            "get": {
+                "tags": [
+                    "Facility"
+                ],
+                "summary": "Get facility by UUID",
+                "operationId": "eaf081a6d4763c0ac8867e8bf0b17b4c",
+                "parameters": [
+                    {
+                        "name": "uuid",
+                        "in": "path",
+                        "description": "Facility UUID",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Facility retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponseItem"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Facility not found"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Facility"
+                ],
+                "summary": "Update facility by UUID",
+                "operationId": "3fa206482be17d4dae2120411f04dc28",
+                "parameters": [
+                    {
+                        "name": "uuid",
+                        "in": "path",
+                        "description": "Facility UUID",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Updated Name"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Facility updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponsePut"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Facility not found"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Facility"
+                ],
+                "summary": "Delete facility by UUID",
+                "operationId": "5fd5b1f360b94e74bffbd1938778145f",
+                "parameters": [
+                    {
+                        "name": "uuid",
+                        "in": "path",
+                        "description": "Facility UUID",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Facility deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponseDelete"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Facility not found"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "ApiResponseList": {
+                "properties": {
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "type": "object"
+                        }
+                    },
+                    "msg": {
+                        "type": "string",
+                        "example": "Data successfully retrieved"
+                    },
+                    "status": {
+                        "type": "integer",
+                        "example": 200
+                    }
+                },
+                "type": "object"
+            },
+            "ApiResponseItem": {
+                "properties": {
+                    "data": {
+                        "type": "object"
+                    },
+                    "msg": {
+                        "type": "string",
+                        "example": "Data successfully retrieved"
+                    },
+                    "status": {
+                        "type": "integer",
+                        "example": 200
+                    }
+                },
+                "type": "object"
+            },
+            "ApiResponsePost": {
+                "properties": {
+                    "msg": {
+                        "type": "string",
+                        "example": "Data successfully created"
+                    },
+                    "status": {
+                        "type": "integer",
+                        "example": 201
+                    },
+                    "data": {
+                        "type": "object",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "ApiResponsePut": {
+                "properties": {
+                    "msg": {
+                        "type": "string",
+                        "example": "Data successfully updated"
+                    },
+                    "status": {
+                        "type": "integer",
+                        "example": 200
+                    },
+                    "data": {
+                        "type": "object",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "ApiResponseDelete": {
+                "properties": {
+                    "msg": {
+                        "type": "string",
+                        "example": "Data successfully deleted"
+                    },
+                    "status": {
+                        "type": "integer",
+                        "example": 204
+                    }
+                },
+                "type": "object"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Facility",
+            "description": "API Endpoints for Facility"
+        }
+    ]
+}
