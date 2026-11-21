@@ -1,13 +1,17 @@
 #!/bin/bash
 set -e
 
-# Support Render dynamic PORT
+# Disable any duplicate MPM modules before starting Apache
+a2dismod mpm_event mpm_worker 2>/dev/null || true
+a2enmod mpm_prefork 2>/dev/null || true
+
+# Support dynamic PORT from Railway/Render
 if [ -n "$PORT" ]; then
-    sed -i "s/Listen 80/Listen $PORT/g" /etc/apache2/ports.conf
-    sed -i "s/<VirtualHost \*:80>/<VirtualHost \*:$PORT>/g" /etc/apache2/sites-available/000-default.conf
+    sed -ri "s/Listen [0-9]+/Listen $PORT/g" /etc/apache2/ports.conf
+    sed -ri "s/<VirtualHost \*:[0-9]+>/<VirtualHost \*:$PORT>/g" /etc/apache2/sites-available/*.conf
 fi
 
-# Ensure storage directories exist
+# Ensure storage directories exist with correct permissions
 mkdir -p storage/framework/sessions storage/framework/views storage/framework/cache storage/logs
 chown -R www-data:www-data storage bootstrap/cache
 chmod -R 775 storage bootstrap/cache

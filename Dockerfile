@@ -9,10 +9,10 @@ RUN apt-get update && apt-get install -y \
     git \
     curl \
     && docker-php-ext-install pdo pdo_pgsql pgsql bcmath zip \
+    && a2dismod mpm_event mpm_worker || true \
+    && a2enmod mpm_prefork rewrite \
+    && echo "ServerName localhost" >> /etc/apache2/apache2.conf \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
-
-# Enable Apache rewrite module
-RUN a2enmod rewrite
 
 # Configure Apache DocumentRoot to Laravel public directory
 ENV APACHE_DOCUMENT_ROOT /var/www/html/public
