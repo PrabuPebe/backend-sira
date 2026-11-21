@@ -199,7 +199,13 @@ class MakeCrudCommand extends Command
 
         $content = $this->files->get($apiRoutePath);
         $controllerClass = "App\\Http\\Controllers\\Api\\{$modelName}Controller";
-        $routeDefinition = "Route::apiResource('{$routeSlug}', \\{$controllerClass}::class);";
+        $routeDefinition = "Route::prefix('{$routeSlug}')->controller(\\{$controllerClass}::class)->group(function () {\n"
+            . "    Route::get('/', 'index');\n"
+            . "    Route::post('/', 'store');\n"
+            . "    Route::get('/detail', 'show');\n"
+            . "    Route::put('/', 'update');\n"
+            . "    Route::delete('/', 'destroy');\n"
+            . "});";
 
         if (str_contains($content, $routeDefinition) || str_contains($content, "'{$routeSlug}'")) {
             $this->warn("Route for [{$routeSlug}] already registered in routes/api.php");

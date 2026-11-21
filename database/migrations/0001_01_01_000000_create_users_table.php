@@ -13,10 +13,15 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('email')->unique();
+            $table->uuid('uuid')->unique();
+            $table->string('full_name', 150);
+            $table->string('email', 150)->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->boolean('must_change_password')->default(false);
+            $table->string('role', 30)->default('PELAPOR'); // PELAPOR, TEKNISI, ADMIN_UNIT, ADMIN_UNIV
+            $table->string('reporter_type', 30)->nullable(); // MAHASISWA, DOSEN, STAF (hanya role PELAPOR)
+            $table->boolean('is_active')->default(true);
             $table->rememberToken();
             $table->timestamps();
         });

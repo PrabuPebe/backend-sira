@@ -20,4 +20,13 @@ class Facility extends Model
     protected $fillable = [
         'name',
     ];
+
+    /**
+     * The attributes that should be hidden for serialization.
+     *
+     * @var list<string>
+     */
+    protected $hidden = [
+        'id',
+    ];
 }

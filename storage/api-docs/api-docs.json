@@ -12,6 +12,632 @@
         }
     ],
     "paths": {
+        "/admin/users": {
+            "get": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Daftar pengguna staf (Admin Universitas)",
+                "operationId": "bb30e0f14210e1da375a9f54915ace15",
+                "parameters": [
+                    {
+                        "name": "role",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "TEKNISI",
+                                "ADMIN_UNIT",
+                                "ADMIN_UNIV",
+                                "PELAPOR"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Daftar pengguna berhasil diambil"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Perbarui akun pengguna staf dan cakupan gedung (Admin Universitas)",
+                "operationId": "b4003bcbf89d60398181f115b506bf2f",
+                "parameters": [
+                    {
+                        "name": "uuid",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "full_name": {
+                                        "type": "string",
+                                        "example": "Rina Handayani"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "example": "rina.handayani@uii.ac.id"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "nullable": true
+                                    },
+                                    "role": {
+                                        "type": "string",
+                                        "enum": [
+                                            "TEKNISI",
+                                            "ADMIN_UNIT",
+                                            "ADMIN_UNIV",
+                                            "PELAPOR"
+                                        ]
+                                    },
+                                    "building_uuids": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "format": "uuid"
+                                        }
+                                    },
+                                    "is_active": {
+                                        "type": "boolean",
+                                        "example": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Pengguna berhasil diperbarui"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Tambah akun staf baru (Teknisi, Admin Unit, Admin Univ)",
+                "operationId": "e00fa17beb250010b40051287e5626f4",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "full_name",
+                                    "email",
+                                    "password",
+                                    "role"
+                                ],
+                                "properties": {
+                                    "full_name": {
+                                        "type": "string",
+                                        "example": "Joko Widodo"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "example": "joko@uii.ac.id"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "example": "password123"
+                                    },
+                                    "role": {
+                                        "type": "string",
+                                        "enum": [
+                                            "TEKNISI",
+                                            "ADMIN_UNIT",
+                                            "ADMIN_UNIV"
+                                        ]
+                                    },
+                                    "building_uuids": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "format": "uuid"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Akun staf berhasil dibuat"
+                    }
+                }
+            }
+        },
+        "/admin/users/scopes": {
+            "post": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Atur cakupan gedung untuk teknisi atau admin unit",
+                "operationId": "e4204eb737f225fff44fa99fc2cc128b",
+                "parameters": [
+                    {
+                        "name": "uuid",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "building_uuids"
+                                ],
+                                "properties": {
+                                    "building_uuids": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "format": "uuid"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Cakupan gedung berhasil diperbarui"
+                    }
+                }
+            }
+        },
+        "/admin/users/toggle-status": {
+            "post": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Aktifkan atau nonaktifkan akun pengguna",
+                "operationId": "bfbef1d4056d25f2f6a09c3892c7106a",
+                "parameters": [
+                    {
+                        "name": "uuid",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Status akun berhasil diubah"
+                    }
+                }
+            }
+        },
+        "/admin/users/detail": {
+            "get": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Detail akun pengguna staf (Admin Universitas)",
+                "operationId": "8b215989999efa80baa50152ab7696d4",
+                "parameters": [
+                    {
+                        "name": "uuid",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detail pengguna berhasil diambil"
+                    },
+                    "404": {
+                        "description": "Pengguna tidak ditemukan"
+                    }
+                }
+            }
+        },
+        "/auth/register": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Pendaftaran mandiri akun Pelapor (Mahasiswa, Dosen, Staf)",
+                "operationId": "08136088c4862c313b35d6518bab8d3a",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "full_name",
+                                    "email",
+                                    "password",
+                                    "reporter_type"
+                                ],
+                                "properties": {
+                                    "full_name": {
+                                        "type": "string",
+                                        "example": "Ahmad Fauzi"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "example": "ahmad@uii.ac.id"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "example": "secret123"
+                                    },
+                                    "reporter_type": {
+                                        "type": "string",
+                                        "example": "MAHASISWA",
+                                        "enum": [
+                                            "MAHASISWA",
+                                            "DOSEN",
+                                            "STAF"
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Registrasi berhasil"
+                    },
+                    "422": {
+                        "description": "Validasi gagal"
+                    }
+                }
+            }
+        },
+        "/auth/login": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Masuk akun (Semua peran)",
+                "operationId": "99d66635c4992aeaa6aa44ff653d0563",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "example": "ahmad@uii.ac.id"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "example": "secret123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Login berhasil"
+                    },
+                    "401": {
+                        "description": "Kredensial tidak valid"
+                    },
+                    "403": {
+                        "description": "Akun dinonaktifkan"
+                    }
+                }
+            }
+        },
+        "/auth/me": {
+            "get": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Ambil profil pengguna yang sedang login",
+                "operationId": "7edae2cdbaafc10dff8c9c4198b320a2",
+                "responses": {
+                    "200": {
+                        "description": "Profil berhasil diambil"
+                    },
+                    "401": {
+                        "description": "Tidak terotentikasi"
+                    }
+                }
+            }
+        },
+        "/auth/logout": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Keluar akun dan batalkan access token",
+                "operationId": "6abf3b64a4bc7838d56346f05a5153af",
+                "responses": {
+                    "200": {
+                        "description": "Logout berhasil"
+                    },
+                    "401": {
+                        "description": "Tidak terotentikasi"
+                    }
+                }
+            }
+        },
+        "/auth/change-password": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Ganti password (Wajib saat login pertama untuk staf)",
+                "operationId": "392f5b8efb38f64f049872d18d481cf1",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "current_password",
+                                    "new_password"
+                                ],
+                                "properties": {
+                                    "current_password": {
+                                        "type": "string"
+                                    },
+                                    "new_password": {
+                                        "type": "string",
+                                        "minLength": 6
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Password berhasil diubah"
+                    },
+                    "400": {
+                        "description": "Password saat ini salah"
+                    },
+                    "401": {
+                        "description": "Tidak terotentikasi"
+                    }
+                }
+            }
+        },
+        "/damage-categories": {
+            "get": {
+                "tags": [
+                    "DamageCategory"
+                ],
+                "summary": "Daftar kategori kerusakan aktif",
+                "operationId": "d2021c3a203caa6744dc6d78cdbe91cc",
+                "responses": {
+                    "200": {
+                        "description": "Daftar kategori berhasil diambil"
+                    }
+                }
+            }
+        },
+        "/damage-categories/detail": {
+            "get": {
+                "tags": [
+                    "DamageCategory"
+                ],
+                "summary": "Detail kategori kerusakan berdasarkan UUID",
+                "operationId": "b2d1011543cccf498091c85fca6d5fed",
+                "parameters": [
+                    {
+                        "name": "uuid",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detail kategori berhasil diambil"
+                    },
+                    "404": {
+                        "description": "Kategori tidak ditemukan"
+                    }
+                }
+            }
+        },
+        "/dashboard/summary": {
+            "get": {
+                "tags": [
+                    "Dashboard"
+                ],
+                "summary": "Ringkasan jumlah laporan per status untuk dashboard (Pelapor, Teknisi, Kaur, Admin Univ)",
+                "description": "Mengambil ringkasan metrik status laporan. Otomatis disesuaikan berdasarkan peran: Pelapor (laporan sendiri), Teknisi (tugas tersedia & tugas saya), Kaur (cakupan gedung), Admin Univ (seluruh kampus).",
+                "operationId": "892e76df1345997e0682213c6fbbb52d",
+                "parameters": [
+                    {
+                        "name": "building_uuid",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "start_date",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "end_date",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Ringkasan data dashboard berhasil diambil"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Akses ditolak"
+                    },
+                    "422": {
+                        "description": "Validasi parameter kueri gagal"
+                    }
+                }
+            }
+        },
+        "/dashboard/statistics": {
+            "get": {
+                "tags": [
+                    "Dashboard"
+                ],
+                "summary": "Statistik lengkap fasilitas kampus (Kaur & Admin Univ)",
+                "description": "Mengambil statistik fasilitas mencakup metrik penyelesaian, tren laporan harian, sebaran status, sebaran kategori, dan indikator rata-rata waktu layanan.",
+                "operationId": "091bbe02f62f6c8fee43af77f74271bf",
+                "parameters": [
+                    {
+                        "name": "month",
+                        "in": "query",
+                        "description": "Bulan (1-12)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 11
+                        }
+                    },
+                    {
+                        "name": "year",
+                        "in": "query",
+                        "description": "Tahun (misal 2026)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 2026
+                        }
+                    },
+                    {
+                        "name": "building_uuid",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Statistik fasilitas berhasil diambil"
+                    },
+                    "403": {
+                        "description": "Hanya staf yang berwenang"
+                    }
+                }
+            }
+        },
+        "/reports/export": {
+            "get": {
+                "tags": [
+                    "Dashboard"
+                ],
+                "summary": "Ekspor data laporan ke berkas CSV untuk integrasi Pronect (FR-14 / US-19)",
+                "operationId": "bf5c804c5d947ef47ead56ce191a6bd7",
+                "parameters": [
+                    {
+                        "name": "building_uuid",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "start_date",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "end_date",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Berkas CSV berhasil diunduh"
+                    }
+                }
+            }
+        },
         "/facilities": {
             "get": {
                 "tags": [
@@ -29,6 +655,59 @@
                                 }
                             }
                         }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Facility"
+                ],
+                "summary": "Update facility by UUID",
+                "operationId": "a7e74579c9628eb8fe0538a597b02e3c",
+                "parameters": [
+                    {
+                        "name": "uuid",
+                        "in": "query",
+                        "description": "Facility UUID",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Updated Name"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Facility updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponsePut"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "UUID query parameter is required"
+                    },
+                    "404": {
+                        "description": "Facility not found"
                     }
                 }
             },
@@ -66,103 +745,17 @@
                         }
                     }
                 }
-            }
-        },
-        "/facilities/{uuid}": {
-            "get": {
-                "tags": [
-                    "Facility"
-                ],
-                "summary": "Get facility by UUID",
-                "operationId": "eaf081a6d4763c0ac8867e8bf0b17b4c",
-                "parameters": [
-                    {
-                        "name": "uuid",
-                        "in": "path",
-                        "description": "Facility UUID",
-                        "required": true,
-                        "schema": {
-                            "type": "string",
-                            "format": "uuid"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Facility retrieved successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ApiResponseItem"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Facility not found"
-                    }
-                }
-            },
-            "put": {
-                "tags": [
-                    "Facility"
-                ],
-                "summary": "Update facility by UUID",
-                "operationId": "3fa206482be17d4dae2120411f04dc28",
-                "parameters": [
-                    {
-                        "name": "uuid",
-                        "in": "path",
-                        "description": "Facility UUID",
-                        "required": true,
-                        "schema": {
-                            "type": "string",
-                            "format": "uuid"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "properties": {
-                                    "name": {
-                                        "type": "string",
-                                        "example": "Updated Name"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Facility updated successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ApiResponsePut"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Facility not found"
-                    }
-                }
             },
             "delete": {
                 "tags": [
                     "Facility"
                 ],
                 "summary": "Delete facility by UUID",
-                "operationId": "5fd5b1f360b94e74bffbd1938778145f",
+                "operationId": "8785b786df56c643addd9da59c9031da",
                 "parameters": [
                     {
                         "name": "uuid",
-                        "in": "path",
+                        "in": "query",
                         "description": "Facility UUID",
                         "required": true,
                         "schema": {
@@ -182,8 +775,1325 @@
                             }
                         }
                     },
+                    "400": {
+                        "description": "UUID query parameter is required"
+                    },
                     "404": {
                         "description": "Facility not found"
+                    }
+                }
+            }
+        },
+        "/facilities/detail": {
+            "get": {
+                "tags": [
+                    "Facility"
+                ],
+                "summary": "Get facility by UUID",
+                "operationId": "0a333a1fedf54658a193502196689a6b",
+                "parameters": [
+                    {
+                        "name": "uuid",
+                        "in": "query",
+                        "description": "Facility UUID",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Facility retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponseItem"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "UUID query parameter is required"
+                    },
+                    "404": {
+                        "description": "Facility not found"
+                    }
+                }
+            }
+        },
+        "/locations": {
+            "get": {
+                "tags": [
+                    "Location"
+                ],
+                "summary": "Daftar lokasi/gedung (Mendukung filter status aktif, tipe, dan pencarian)",
+                "operationId": "02645c8bfbf14f52457023b2bf782092",
+                "parameters": [
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "type",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "BUILDING",
+                                "ROOM"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "is_active",
+                        "in": "query",
+                        "description": "Filter status aktif: true, false, atau all",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "true"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Daftar lokasi berhasil diambil"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Location"
+                ],
+                "summary": "Perbarui gedung (Admin Universitas)",
+                "operationId": "f7c9fc5882784cd8cd6ebea45e1fc63c",
+                "parameters": [
+                    {
+                        "name": "uuid",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Gedung Laboratorium Terpadu"
+                                    },
+                                    "code": {
+                                        "type": "string",
+                                        "example": "GLT"
+                                    },
+                                    "faculty": {
+                                        "type": "string",
+                                        "example": "Fakultas Teknologi Industri"
+                                    },
+                                    "floor_count": {
+                                        "type": "integer",
+                                        "example": 4
+                                    },
+                                    "is_active": {
+                                        "type": "boolean",
+                                        "example": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Lokasi berhasil diperbarui"
+                    },
+                    "403": {
+                        "description": "Tidak berwenang"
+                    },
+                    "404": {
+                        "description": "Lokasi tidak ditemukan"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Location"
+                ],
+                "summary": "Tambah gedung baru (Admin Universitas)",
+                "operationId": "136dd4376518a2984af8999cce9172d7",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Gedung Laboratorium Terpadu"
+                                    },
+                                    "code": {
+                                        "type": "string",
+                                        "example": "GLT"
+                                    },
+                                    "faculty": {
+                                        "type": "string",
+                                        "example": "Fakultas Teknologi Industri"
+                                    },
+                                    "floor_count": {
+                                        "type": "integer",
+                                        "example": 4
+                                    },
+                                    "type": {
+                                        "type": "string",
+                                        "default": "BUILDING",
+                                        "enum": [
+                                            "BUILDING",
+                                            "ROOM"
+                                        ]
+                                    },
+                                    "parent_uuid": {
+                                        "type": "string",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Gedung berhasil ditambahkan"
+                    },
+                    "403": {
+                        "description": "Hanya Admin Universitas yang berwenang"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Location"
+                ],
+                "summary": "Nonaktifkan gedung (Admin Universitas)",
+                "operationId": "ac5d4862609f8f2eb6d6e15680a949ea",
+                "parameters": [
+                    {
+                        "name": "uuid",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Gedung dinonaktifkan"
+                    },
+                    "400": {
+                        "description": "Gedung memiliki laporan aktif, hanya bisa dinonaktifkan"
+                    }
+                }
+            }
+        },
+        "/locations/detail": {
+            "get": {
+                "tags": [
+                    "Location"
+                ],
+                "summary": "Detail lokasi berdasarkan UUID",
+                "operationId": "331051f1f0f68624a3656d9bd00c968b",
+                "parameters": [
+                    {
+                        "name": "uuid",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detail lokasi berhasil diambil"
+                    },
+                    "400": {
+                        "description": "Parameter UUID wajib diisi"
+                    },
+                    "404": {
+                        "description": "Lokasi tidak ditemukan"
+                    }
+                }
+            }
+        },
+        "/notifications": {
+            "get": {
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "Daftar notifikasi pengguna saat ini",
+                "operationId": "b1274a2aaae8a4295a7e1925e8d8090f",
+                "parameters": [
+                    {
+                        "name": "is_read",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Daftar notifikasi berhasil diambil"
+                    },
+                    "401": {
+                        "description": "Tidak terotentikasi"
+                    }
+                }
+            }
+        },
+        "/notifications/mark-read": {
+            "post": {
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "Tandai notifikasi sebagai sudah dibaca",
+                "operationId": "cb4fb01c3e1b1c33ec5b7dbaae8de174",
+                "parameters": [
+                    {
+                        "name": "uuid",
+                        "in": "query",
+                        "description": "UUID spesifik notifikasi",
+                        "required": false
+                    },
+                    {
+                        "name": "all",
+                        "in": "query",
+                        "description": "Set ke 1 untuk tandai semua notifikasi sudah dibaca",
+                        "required": false
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Notifikasi berhasil diperbarui"
+                    },
+                    "404": {
+                        "description": "Notifikasi tidak ditemukan"
+                    }
+                }
+            }
+        },
+        "/reports/public": {
+            "get": {
+                "tags": [
+                    "Report"
+                ],
+                "summary": "Daftar laporan publik per gedung (nama pelapor disamarkan)",
+                "operationId": "988679bd2e302b3b842a87973bec5421",
+                "parameters": [
+                    {
+                        "name": "building_uuid",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Jumlah item per halaman (misal 5, 10, 15)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Daftar laporan publik berhasil diambil"
+                    }
+                }
+            }
+        },
+        "/reports": {
+            "get": {
+                "tags": [
+                    "Report"
+                ],
+                "summary": "Daftar semua laporan staf (Kelola Laporan untuk Kaur & Admin Univ)",
+                "description": "Mengambil daftar laporan dengan filter lengkap status, prioritas, gedung, kategori, teknisi, rentang tanggal, dan pencarian sesuai cakupan peran staf.",
+                "operationId": "81a8afd2aa3c69c6b5565682c3a78dd7",
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "DITERIMA",
+                                "DITUGASKAN",
+                                "DIPROSES",
+                                "MENUNGGU",
+                                "SELESAI",
+                                "TIDAK_DAPAT_DIPERBAIKI"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "priority",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "RENDAH",
+                                "NORMAL",
+                                "TINGGI",
+                                "URGEN"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "building_uuid",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "category_uuid",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "technician_uuid",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "start_date",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "end_date",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Daftar laporan berhasil diambil"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Hanya staf yang berwenang"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Report"
+                ],
+                "summary": "Edit laporan (Hanya pelapor & status masih DITERIMA tanpa penugasan)",
+                "operationId": "2580cebb4a2f49ee7fe4f6d3e3d0337d",
+                "parameters": [
+                    {
+                        "name": "uuid",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Laporan berhasil diperbarui"
+                    },
+                    "403": {
+                        "description": "Tidak berwenang mengedit laporan ini"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Report"
+                ],
+                "summary": "Kirim laporan kerusakan baru (Pelapor)",
+                "operationId": "39a2e936857d7fa55026c1daac0f01d0",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "building_uuid",
+                                    "room_name",
+                                    "category_uuid",
+                                    "description",
+                                    "photo"
+                                ],
+                                "properties": {
+                                    "title": {
+                                        "description": "Nama kerusakan fasilitas",
+                                        "type": "string",
+                                        "example": "AC tidak dingin"
+                                    },
+                                    "nama_kerusakan": {
+                                        "type": "string",
+                                        "example": "AC tidak dingin"
+                                    },
+                                    "building_uuid": {
+                                        "description": "UUID gedung lokasi",
+                                        "type": "string",
+                                        "format": "uuid"
+                                    },
+                                    "room_name": {
+                                        "type": "string",
+                                        "example": "Ruang 3.12"
+                                    },
+                                    "floor": {
+                                        "type": "string",
+                                        "example": "3"
+                                    },
+                                    "category_uuid": {
+                                        "description": "UUID kategori kerusakan",
+                                        "type": "string",
+                                        "format": "uuid"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "AC menyala tetapi tidak mengeluarkan udara dingin sejak pagi."
+                                    },
+                                    "photo": {
+                                        "description": "Foto bukti kerusakan (JPG/PNG max 5MB)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Laporan berhasil dibuat"
+                    },
+                    "422": {
+                        "description": "Validasi gagal"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Report"
+                ],
+                "summary": "Hapus laporan (Soft delete - hanya pelapor & status masih DITERIMA)",
+                "operationId": "9518388e15b89b3fbb911b04e484e7ee",
+                "parameters": [
+                    {
+                        "name": "uuid",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Laporan berhasil dihapus"
+                    }
+                }
+            }
+        },
+        "/reports/technicians": {
+            "get": {
+                "tags": [
+                    "Report"
+                ],
+                "summary": "Daftar teknisi dan beban tugas aktif (Untuk modal penugasan teknisi oleh Kaur)",
+                "description": "Menampilkan daftar teknisi aktif beserta gedung cakupan dan jumlah tugas yang sedang aktif ditangani.",
+                "operationId": "e14229d42aac54d56579ebcc6835e414",
+                "parameters": [
+                    {
+                        "name": "building_uuid",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Daftar teknisi berhasil diambil"
+                    },
+                    "403": {
+                        "description": "Hanya Admin Unit atau Admin Univ yang berwenang"
+                    }
+                }
+            }
+        },
+        "/reports/my-reports": {
+            "get": {
+                "tags": [
+                    "Report"
+                ],
+                "summary": "Daftar laporan milik pelapor yang login (mendukung filter status, gedung, pencarian, dan paginasi)",
+                "operationId": "3edf96512bd81b7ac8a37ab212ac1bda",
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "DITERIMA",
+                                "DIPROSES",
+                                "SELESAI"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "building_uuid",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Jumlah item per halaman (misal 5, 10, 15)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Laporan saya berhasil diambil"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                }
+            }
+        },
+        "/reports/new-update": {
+            "get": {
+                "tags": [
+                    "Report"
+                ],
+                "summary": "Daftar pembaruan terbaru dari laporan yang dikirim pengguna",
+                "description": "Mengambil daftar pembaruan terbaru dari laporan yang dikirim oleh pengguna saat ini dengan field wajib: no tiket, title kerusakan, lokasi, tanggal, status, dan uuid (seluruh ID internal dirahasiakan).",
+                "operationId": "bc0d92fb7f5792c511145f9285ea7d54",
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "DITERIMA",
+                                "DIPROSES",
+                                "SELESAI"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    },
+                    {
+                        "name": "view",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "reports",
+                            "enum": [
+                                "reports",
+                                "timeline"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Daftar pembaruan terbaru berhasil diambil"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                }
+            }
+        },
+        "/reports/tasks": {
+            "get": {
+                "tags": [
+                    "Report"
+                ],
+                "summary": "Daftar tugas teknisi / kaur (berdasarkan cakupan gedung, tab, pencarian, pengurutan, & paginasi)",
+                "description": "Menampilkan daftar tugas untuk teknisi. Mendukung tab (all, available, mine), sorting (latest, oldest, priority), dan per_page (5, 10, 15).",
+                "operationId": "f7dcce720473501ee24bc85cc4ec86ae",
+                "parameters": [
+                    {
+                        "name": "tab",
+                        "in": "query",
+                        "description": "Tab tugas: all, available, mine",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "all",
+                            "enum": [
+                                "all",
+                                "available",
+                                "mine"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "description": "Pengurutan: latest (terbaru), oldest (terlama), priority (prioritas)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "priority",
+                            "enum": [
+                                "latest",
+                                "oldest",
+                                "priority"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "building_uuid",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "DITERIMA",
+                                "DITUGASKAN",
+                                "DIPROSES",
+                                "MENUNGGU",
+                                "SELESAI",
+                                "TIDAK_DAPAT_DIPERBAIKI"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Pencarian tugas atau ruangan",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Jumlah item per halaman (misal 5, 10, 15)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Daftar tugas berhasil diambil"
+                    }
+                }
+            }
+        },
+        "/reports/detail": {
+            "get": {
+                "tags": [
+                    "Report"
+                ],
+                "summary": "Detail lengkap laporan berdasarkan UUID atau Nomor Tiket",
+                "operationId": "fd3a235ef85553aa8cbbb95e7b4bcbb1",
+                "parameters": [
+                    {
+                        "name": "uuid",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "ticket_no",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detail laporan berhasil diambil"
+                    },
+                    "404": {
+                        "description": "Laporan tidak ditemukan"
+                    }
+                }
+            }
+        },
+        "/reports/like": {
+            "post": {
+                "tags": [
+                    "Report"
+                ],
+                "summary": "Beri / batalkan like pada laporan publik (1 user 1 like)",
+                "operationId": "96c7f0b7b2345d54448f205b2c20d2c3",
+                "parameters": [
+                    {
+                        "name": "uuid",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Status like berhasil diperbarui"
+                    }
+                }
+            }
+        },
+        "/reports/self-assign": {
+            "post": {
+                "tags": [
+                    "Report"
+                ],
+                "summary": "Teknisi mengambil tugas mandiri dari daftar tugas",
+                "operationId": "f8561d4dfc58401eaeab7a9358bec5b5",
+                "parameters": [
+                    {
+                        "name": "uuid",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Tugas berhasil diambil"
+                    }
+                }
+            }
+        },
+        "/reports/assign": {
+            "post": {
+                "tags": [
+                    "Report"
+                ],
+                "summary": "Kaur / Admin Unit menugaskan laporan ke teknisi tertentu",
+                "operationId": "1a8102338d3b1c2969ced99faf32af64",
+                "parameters": [
+                    {
+                        "name": "uuid",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "technician_uuid"
+                                ],
+                                "properties": {
+                                    "technician_uuid": {
+                                        "type": "string",
+                                        "format": "uuid"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Penugasan berhasil disimpan"
+                    }
+                }
+            }
+        },
+        "/reports/respond-assignment": {
+            "post": {
+                "tags": [
+                    "Report"
+                ],
+                "summary": "Teknisi merespons penugasan (ACCEPT atau REJECT)",
+                "operationId": "239d4efb4298af07d9ffc628e96d100c",
+                "parameters": [
+                    {
+                        "name": "uuid",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "action"
+                                ],
+                                "properties": {
+                                    "action": {
+                                        "type": "string",
+                                        "enum": [
+                                            "ACCEPT",
+                                            "REJECT"
+                                        ]
+                                    },
+                                    "reject_reason": {
+                                        "type": "string",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Respon penugasan berhasil disimpan"
+                    }
+                }
+            }
+        },
+        "/reports/status": {
+            "post": {
+                "tags": [
+                    "Report"
+                ],
+                "summary": "Teknisi memperbarui status penanganan (DIPROSES, MENUNGGU, TIDAK_DAPAT_DIPERBAIKI, SELESAI)",
+                "description": "Teknisi memperbarui progres pengerjaan, mencatat kebutuhan suku cadang (MENUNGGU), menandai kerusakan tidak dapat diperbaiki (TIDAK_DAPAT_DIPERBAIKI), atau menyelesaikan perbaikan dengan mengunggah foto bukti (SELESAI).",
+                "operationId": "5c4c422d8c23fd98e5527d593662ca0a",
+                "parameters": [
+                    {
+                        "name": "uuid",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "status"
+                                ],
+                                "properties": {
+                                    "status": {
+                                        "type": "string",
+                                        "example": "SELESAI",
+                                        "enum": [
+                                            "DIPROSES",
+                                            "MENUNGGU",
+                                            "TIDAK_DAPAT_DIPERBAIKI",
+                                            "SELESAI"
+                                        ]
+                                    },
+                                    "note": {
+                                        "type": "string",
+                                        "example": "Filter dibersihkan dan tekanan refrigeran diperiksa. AC dingin kembali."
+                                    },
+                                    "estimated_completion_date": {
+                                        "type": "string",
+                                        "format": "date"
+                                    },
+                                    "is_cannot_be_repaired": {
+                                        "type": "boolean",
+                                        "example": false
+                                    },
+                                    "proof_photo": {
+                                        "description": "Foto bukti perbaikan (wajib saat status SELESAI)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Status berhasil diperbarui"
+                    }
+                }
+            }
+        },
+        "/reports/priority": {
+            "post": {
+                "tags": [
+                    "Report"
+                ],
+                "summary": "Kaur menetapkan prioritas laporan (RENDAH, NORMAL, TINGGI, atau URGEN)",
+                "operationId": "6b5df5387fdc55e125636379e0ad504f",
+                "parameters": [
+                    {
+                        "name": "uuid",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "priority"
+                                ],
+                                "properties": {
+                                    "priority": {
+                                        "type": "string",
+                                        "enum": [
+                                            "RENDAH",
+                                            "NORMAL",
+                                            "TINGGI",
+                                            "URGEN"
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Prioritas berhasil diperbarui"
+                    }
+                }
+            }
+        },
+        "/reports/major-damage": {
+            "post": {
+                "tags": [
+                    "Report"
+                ],
+                "summary": "Kaur menandai kerusakan besar yang memerlukan anggaran/surat Badan Wakaf",
+                "operationId": "b72f0b91cfdab8996f2f0311c972e109",
+                "parameters": [
+                    {
+                        "name": "uuid",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "major_damage_note"
+                                ],
+                                "properties": {
+                                    "major_damage_note": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Penanda kerusakan besar berhasil disimpan"
+                    }
+                }
+            }
+        },
+        "/reports/move-building": {
+            "post": {
+                "tags": [
+                    "Report"
+                ],
+                "summary": "Kaur memindahkan laporan ke gedung lain jika salah lokasi",
+                "operationId": "4b860835c0f9f96e4f2f0b69a076f2d7",
+                "parameters": [
+                    {
+                        "name": "uuid",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "target_building_uuid"
+                                ],
+                                "properties": {
+                                    "target_building_uuid": {
+                                        "type": "string",
+                                        "format": "uuid"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Laporan berhasil dipindahkan"
+                    }
+                }
+            }
+        },
+        "/reports/confirm": {
+            "post": {
+                "tags": [
+                    "Report"
+                ],
+                "summary": "Pelapor mengonfirmasi perbaikan selesai dan memberikan rating (Could)",
+                "operationId": "5ac28b1ca66b4a8b7285a34639a76bae",
+                "parameters": [
+                    {
+                        "name": "uuid",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "rating": {
+                                        "type": "integer",
+                                        "maximum": 5,
+                                        "minimum": 1
+                                    },
+                                    "comment": {
+                                        "type": "string",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Konfirmasi berhasil disimpan"
+                    }
+                }
+            }
+        },
+        "/reports/reopen": {
+            "post": {
+                "tags": [
+                    "Report"
+                ],
+                "summary": "Pelapor membuka kembali laporan jika perbaikan belum beres (Could)",
+                "operationId": "62462ce662fbb549a557c23efe1ef455",
+                "parameters": [
+                    {
+                        "name": "uuid",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "reason"
+                                ],
+                                "properties": {
+                                    "reason": {
+                                        "type": "string",
+                                        "example": "AC masih bocor air"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Laporan dibuka kembali"
                     }
                 }
             }
@@ -277,8 +2187,36 @@
     },
     "tags": [
         {
+            "name": "Admin",
+            "description": "Pengelolaan pengguna dan cakupan gedung oleh Admin Universitas"
+        },
+        {
+            "name": "Auth",
+            "description": "Authentication and profile management"
+        },
+        {
+            "name": "DamageCategory",
+            "description": "Master data kategori kerusakan"
+        },
+        {
+            "name": "Dashboard",
+            "description": "Metrik laporan dan ekspor data ke Pronect"
+        },
+        {
             "name": "Facility",
             "description": "API Endpoints for Facility"
+        },
+        {
+            "name": "Location",
+            "description": "Master data gedung dan lokasi"
+        },
+        {
+            "name": "Notifications",
+            "description": "Notifikasi in-app untuk pengguna"
+        },
+        {
+            "name": "Report",
+            "description": "Manajemen laporan kerusakan fasilitas kampus"
         }
     ]
 }

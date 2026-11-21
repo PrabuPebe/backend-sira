@@ -65,13 +65,13 @@ class FacilityController extends BaseApiController
     }
 
     #[OA\Get(
-        path: '/facilities/{uuid}',
+        path: '/facilities/detail',
         summary: 'Get facility by UUID',
         tags: ['Facility'],
         parameters: [
             new OA\Parameter(
                 name: 'uuid',
-                in: 'path',
+                in: 'query',
                 required: true,
                 description: 'Facility UUID',
                 schema: new OA\Schema(type: 'string', format: 'uuid')
@@ -83,24 +83,30 @@ class FacilityController extends BaseApiController
                 description: 'Facility retrieved successfully',
                 content: new OA\JsonContent(ref: '#/components/schemas/ApiResponseItem')
             ),
+            new OA\Response(response: 400, description: 'UUID query parameter is required'),
             new OA\Response(response: 404, description: 'Facility not found')
         ]
     )]
-    public function show(string $uuid): JsonResponse
+    public function show(\Illuminate\Http\Request $request): JsonResponse
     {
+        $uuid = (string) $request->query('uuid');
+        if (empty($uuid)) {
+            return $this->errorResponse('Query parameter uuid is required', 400);
+        }
+
         $data = $this->service->getByUuid($uuid);
 
         return $this->getResponse($data, 'Facility retrieved successfully', 200);
     }
 
     #[OA\Put(
-        path: '/facilities/{uuid}',
+        path: '/facilities',
         summary: 'Update facility by UUID',
         tags: ['Facility'],
         parameters: [
             new OA\Parameter(
                 name: 'uuid',
-                in: 'path',
+                in: 'query',
                 required: true,
                 description: 'Facility UUID',
                 schema: new OA\Schema(type: 'string', format: 'uuid')
@@ -120,24 +126,30 @@ class FacilityController extends BaseApiController
                 description: 'Facility updated successfully',
                 content: new OA\JsonContent(ref: '#/components/schemas/ApiResponsePut')
             ),
+            new OA\Response(response: 400, description: 'UUID query parameter is required'),
             new OA\Response(response: 404, description: 'Facility not found')
         ]
     )]
-    public function update(UpdateFacilityRequest $request, string $uuid): JsonResponse
+    public function update(UpdateFacilityRequest $request): JsonResponse
     {
+        $uuid = (string) $request->query('uuid');
+        if (empty($uuid)) {
+            return $this->errorResponse('Query parameter uuid is required', 400);
+        }
+
         $this->service->update($uuid, $request->validated());
 
         return $this->putResponse(null, 'Facility updated successfully', 200);
     }
 
     #[OA\Delete(
-        path: '/facilities/{uuid}',
+        path: '/facilities',
         summary: 'Delete facility by UUID',
         tags: ['Facility'],
         parameters: [
             new OA\Parameter(
                 name: 'uuid',
-                in: 'path',
+                in: 'query',
                 required: true,
                 description: 'Facility UUID',
                 schema: new OA\Schema(type: 'string', format: 'uuid')
@@ -149,11 +161,17 @@ class FacilityController extends BaseApiController
                 description: 'Facility deleted successfully',
                 content: new OA\JsonContent(ref: '#/components/schemas/ApiResponseDelete')
             ),
+            new OA\Response(response: 400, description: 'UUID query parameter is required'),
             new OA\Response(response: 404, description: 'Facility not found')
         ]
     )]
-    public function destroy(string $uuid): JsonResponse
+    public function destroy(\Illuminate\Http\Request $request): JsonResponse
     {
+        $uuid = (string) $request->query('uuid');
+        if (empty($uuid)) {
+            return $this->errorResponse('Query parameter uuid is required', 400);
+        }
+
         $this->service->delete($uuid);
 
         return $this->deleteResponse('Facility deleted successfully', 204);

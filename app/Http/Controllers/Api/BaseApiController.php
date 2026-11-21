@@ -62,4 +62,9 @@ use OpenApi\Attributes as OA;
 abstract class BaseApiController extends Controller
 {
     use ApiResponse;
+
+    protected function likeOperator(): string
+    {
+        return \Illuminate\Support\Facades\DB::connection()->getDriverName() === 'pgsql' ? 'ilike' : 'like';
+    }
 }

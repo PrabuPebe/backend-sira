@@ -65,13 +65,13 @@ class {{modelName}}Controller extends BaseApiController
     }
 
     #[OA\Get(
-        path: '/{{routeSlug}}/{uuid}',
+        path: '/{{routeSlug}}/detail',
         summary: 'Get {{modelLower}} by UUID',
         tags: ['{{modelName}}'],
         parameters: [
             new OA\Parameter(
                 name: 'uuid',
-                in: 'path',
+                in: 'query',
                 required: true,
                 description: '{{modelLabel}} UUID',
                 schema: new OA\Schema(type: 'string', format: 'uuid')
@@ -83,24 +83,30 @@ class {{modelName}}Controller extends BaseApiController
                 description: '{{modelLabel}} retrieved successfully',
                 content: new OA\JsonContent(ref: '#/components/schemas/ApiResponseItem')
             ),
+            new OA\Response(response: 400, description: 'UUID query parameter is required'),
             new OA\Response(response: 404, description: '{{modelLabel}} not found')
         ]
     )]
-    public function show(string $uuid): JsonResponse
+    public function show(\Illuminate\Http\Request $request): JsonResponse
     {
+        $uuid = (string) $request->query('uuid');
+        if (empty($uuid)) {
+            return $this->errorResponse('Query parameter uuid is required', 400);
+        }
+
         $data = $this->service->getByUuid($uuid);
 
         return $this->getResponse($data, '{{modelLabel}} retrieved successfully', 200);
     }
 
     #[OA\Put(
-        path: '/{{routeSlug}}/{uuid}',
+        path: '/{{routeSlug}}',
         summary: 'Update {{modelLower}} by UUID',
         tags: ['{{modelName}}'],
         parameters: [
             new OA\Parameter(
                 name: 'uuid',
-                in: 'path',
+                in: 'query',
                 required: true,
                 description: '{{modelLabel}} UUID',
                 schema: new OA\Schema(type: 'string', format: 'uuid')
@@ -120,24 +126,30 @@ class {{modelName}}Controller extends BaseApiController
                 description: '{{modelLabel}} updated successfully',
                 content: new OA\JsonContent(ref: '#/components/schemas/ApiResponsePut')
             ),
+            new OA\Response(response: 400, description: 'UUID query parameter is required'),
             new OA\Response(response: 404, description: '{{modelLabel}} not found')
         ]
     )]
-    public function update(Update{{modelName}}Request $request, string $uuid): JsonResponse
+    public function update(Update{{modelName}}Request $request): JsonResponse
     {
+        $uuid = (string) $request->query('uuid');
+        if (empty($uuid)) {
+            return $this->errorResponse('Query parameter uuid is required', 400);
+        }
+
         $this->service->update($uuid, $request->validated());
 
         return $this->putResponse(null, '{{modelLabel}} updated successfully', 200);
     }
 
     #[OA\Delete(
-        path: '/{{routeSlug}}/{uuid}',
+        path: '/{{routeSlug}}',
         summary: 'Delete {{modelLower}} by UUID',
         tags: ['{{modelName}}'],
         parameters: [
             new OA\Parameter(
                 name: 'uuid',
-                in: 'path',
+                in: 'query',
                 required: true,
                 description: '{{modelLabel}} UUID',
                 schema: new OA\Schema(type: 'string', format: 'uuid')
@@ -149,11 +161,17 @@ class {{modelName}}Controller extends BaseApiController
                 description: '{{modelLabel}} deleted successfully',
                 content: new OA\JsonContent(ref: '#/components/schemas/ApiResponseDelete')
             ),
+            new OA\Response(response: 400, description: 'UUID query parameter is required'),
             new OA\Response(response: 404, description: '{{modelLabel}} not found')
         ]
     )]
-    public function destroy(string $uuid): JsonResponse
+    public function destroy(\Illuminate\Http\Request $request): JsonResponse
     {
+        $uuid = (string) $request->query('uuid');
+        if (empty($uuid)) {
+            return $this->errorResponse('Query parameter uuid is required', 400);
+        }
+
         $this->service->delete($uuid);
 
         return $this->deleteResponse('{{modelLabel}} deleted successfully', 204);
