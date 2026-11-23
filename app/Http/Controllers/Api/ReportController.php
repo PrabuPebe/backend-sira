@@ -737,9 +737,9 @@ class ReportController extends BaseApiController
     )]
     public function toggleLike(Request $request): JsonResponse
     {
-        $uuid = (string) $request->query('uuid');
+        $uuid = (string) ($request->query('uuid') ?: $request->input('uuid', $request->input('report_uuid', $request->route('uuid'))));
         if (empty($uuid)) {
-            return $this->errorResponse('Query parameter uuid wajib diisi', 400);
+            return $this->errorResponse('Parameter uuid wajib diisi', 400);
         }
 
         $result = $this->reportService->toggleLike($request->user(), $uuid);
