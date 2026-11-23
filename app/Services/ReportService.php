@@ -198,15 +198,23 @@ class ReportService
             $report = Report::where('uuid', $reportUuid)->firstOrFail();
             $technician = User::where('uuid', $technicianUuid)->firstOrFail();
 
-            // Validate kaur scope
-            $kaurHasScope = UserBuildingScope::where('user_id', $kaur->id)
-                ->where('building_id', $report->building_id)
-                ->exists();
-
-            if (!$kaurHasScope) {
+            if ($technician->role !== 'TEKNISI') {
                 throw ValidationException::withMessages([
-                    'scope' => ['Laporan ini di luar gedung cakupan Anda.'],
+                    'technician_uuid' => ['Pengguna yang dipilih bukan seorang teknisi.'],
                 ]);
+            }
+
+            // Validate kaur scope (Admin Univ has all buildings)
+            if ($kaur->role !== 'ADMIN_UNIV') {
+                $kaurHasScope = UserBuildingScope::where('user_id', $kaur->id)
+                    ->where('building_id', $report->building_id)
+                    ->exists();
+
+                if (!$kaurHasScope) {
+                    throw ValidationException::withMessages([
+                        'scope' => ['Laporan ini di luar gedung cakupan Anda.'],
+                    ]);
+                }
             }
 
             // Validate technician scope
@@ -216,7 +224,7 @@ class ReportService
 
             if (!$techHasScope) {
                 throw ValidationException::withMessages([
-                    'technician' => ['Teknisi ini tidak mencakup gedung laporan ini.'],
+                    'technician_uuid' => ['Teknisi ini tidak mencakup gedung laporan ini.'],
                 ]);
             }
 
@@ -460,8 +468,12 @@ class ReportService
                 ->first();
 
             if ($existingLike) {
-                $existingLike->delete();
-                $report->decrement('like_count');
+                ReportLike::where('report_id', $report->id)
+                    ->where('user_id', $user->id)
+                    ->delete();
+                if ($report->like_count > 0) {
+                    $report->decrement('like_count');
+                }
                 $liked = false;
             } else {
                 ReportLike::create([

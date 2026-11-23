@@ -351,4 +351,58 @@ class AdminAndDashboardApiTest extends TestCase
 
         $markAllRes->assertStatus(200);
     }
+
+    public function test_admin_user_index_respects_per_page_parameter(): void
+    {
+        $adminToken = $this->authenticateAs($this->adminUniv);
+
+        $res = $this->withHeader('Authorization', 'Bearer ' . $adminToken)
+            ->getJson('/api/admin/users?per_page=5');
+
+        $res->assertStatus(200);
+        $this->assertEquals(5, $res->json('data.per_page'));
+    }
+
+    public function test_location_validation_and_include_inactive_parameter(): void
+    {
+        $adminToken = $this->authenticateAs($this->adminUniv);
+
+        // Validation: missing code, faculty, floor_count
+        $invalidRes = $this->withHeader('Authorization', 'Bearer ' . $adminToken)
+            ->postJson('/api/locations', [
+                'name' => 'Gedung Tanpa Kode',
+            ]);
+
+        $invalidRes->assertStatus(422)
+            ->assertJsonValidationErrors(['code', 'faculty', 'floor_count']);
+
+        // Valid creation
+        $validRes = $this->withHeader('Authorization', 'Bearer ' . $adminToken)
+            ->postJson('/api/locations', [
+                'name' => 'Gedung Baru FK',
+                'code' => 'GB-FK',
+                'faculty' => 'Fakultas Kedokteran',
+                'floor_count' => 4,
+            ]);
+
+        $validRes->assertStatus(201);
+        $newLocUuid = $validRes->json('data.uuid');
+
+        // Deactivate location
+        $delRes = $this->withHeader('Authorization', 'Bearer ' . $adminToken)
+            ->deleteJson("/api/locations?uuid={$newLocUuid}");
+
+        $delRes->assertStatus(200)
+            ->assertJson(['status' => 200]);
+
+        // Default index should not include inactive
+        $indexRes = $this->getJson('/api/locations');
+        $indexRes->assertStatus(200);
+        $this->assertNull(collect($indexRes->json('data'))->firstWhere('uuid', $newLocUuid));
+
+        // include_inactive=1 should include inactive
+        $includeRes = $this->getJson('/api/locations?include_inactive=1');
+        $includeRes->assertStatus(200);
+        $this->assertNotNull(collect($includeRes->json('data'))->firstWhere('uuid', $newLocUuid));
+    }
 }

@@ -6,6 +6,7 @@ use App\Models\Location;
 use App\Models\Notification;
 use App\Models\Report;
 use App\Models\ReportConfirmation;
+use App\Models\ReportLike;
 use App\Models\ReportTimeline;
 use App\Models\User;
 use App\Models\UserBuildingScope;
@@ -90,9 +91,9 @@ class ReportController extends BaseApiController
                     'reporter_type' => $report->reporter->reporter_type,
                 ];
             }
-            if ($currentUser) {
-                $data['is_liked_by_me'] = isset($likedReportIds[$report->id]);
-            }
+            $isLiked = $currentUser ? isset($likedReportIds[$report->id]) : false;
+            $data['is_liked'] = $isLiked;
+            $data['is_liked_by_me'] = $isLiked;
             return $data;
         });
 
@@ -553,7 +554,18 @@ class ReportController extends BaseApiController
             }
         }
 
-        return $this->getResponse($report, 'Detail laporan berhasil diambil', 200);
+        $isLiked = false;
+        if ($user) {
+            $isLiked = ReportLike::where('report_id', $report->id)
+                ->where('user_id', $user->id)
+                ->exists();
+        }
+
+        $data = $report->toArray();
+        $data['is_liked'] = $isLiked;
+        $data['is_liked_by_me'] = $isLiked;
+
+        return $this->getResponse($data, 'Detail laporan berhasil diambil', 200);
     }
 
     #[OA\Post(
@@ -598,6 +610,10 @@ class ReportController extends BaseApiController
             'description' => ['required', 'string'],
             'photo' => ['required', 'file', 'image', 'mimes:jpg,jpeg,png', 'max:5120'], // Max 5MB
         ]);
+
+        if (!empty($validated['floor'])) {
+            $validated['floor'] = trim((string) preg_replace('/[^0-9]/', '', $validated['floor'])) ?: null;
+        }
 
         $photo = $request->file('photo');
         $report = $this->reportService->createReport($user, $validated, $photo);
@@ -786,13 +802,22 @@ class ReportController extends BaseApiController
             return $this->errorResponse('Hanya Admin Unit yang dapat menugaskan teknisi', 403);
         }
 
-        $uuid = (string) $request->query('uuid');
+        $uuid = (string) ($request->query('uuid') ?: $request->input('uuid', $request->input('report_uuid')));
         if (empty($uuid)) {
             return $this->errorResponse('Query parameter uuid wajib diisi', 400);
         }
 
+        $request->merge(['report_uuid' => $uuid]);
         $validated = $request->validate([
-            'technician_uuid' => ['required', 'string', 'exists:users,uuid'],
+            'report_uuid' => ['required', 'bail', 'uuid', 'exists:reports,uuid'],
+            'technician_uuid' => ['required', 'bail', 'uuid', 'exists:users,uuid'],
+        ], [
+            'report_uuid.required' => 'UUID laporan wajib diisi',
+            'report_uuid.uuid' => 'Format UUID laporan tidak valid',
+            'report_uuid.exists' => 'Laporan tidak ditemukan',
+            'technician_uuid.required' => 'UUID teknisi wajib diisi',
+            'technician_uuid.uuid' => 'Format UUID teknisi tidak valid',
+            'technician_uuid.exists' => 'Teknisi tidak ditemukan',
         ]);
 
         $report = $this->reportService->assignByKaur($user, $uuid, $validated['technician_uuid']);

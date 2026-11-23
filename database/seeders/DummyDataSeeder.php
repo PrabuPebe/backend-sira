@@ -153,6 +153,12 @@ class DummyDataSeeder extends Seeder
                 'role' => 'ADMIN_UNIT',
                 'must_change_password' => false,
             ],
+            'kaur.fk' => [
+                'email' => 'kaur.fk@uii.ac.id',
+                'full_name' => 'dr. Triyono (Kaur Sarpras FK)',
+                'role' => 'ADMIN_UNIT',
+                'must_change_password' => false,
+            ],
             // Teknisi
             'teknisi.fti' => [
                 'email' => 'teknisi.fti@uii.ac.id',
@@ -175,6 +181,12 @@ class DummyDataSeeder extends Seeder
             'teknisi.gku' => [
                 'email' => 'teknisi.gku@uii.ac.id',
                 'full_name' => 'Agus Priyono (Teknisi GKU & Audio)',
+                'role' => 'TEKNISI',
+                'must_change_password' => false,
+            ],
+            'teknisi.fk' => [
+                'email' => 'teknisi.fk@uii.ac.id',
+                'full_name' => 'Wahyu Hidayat (Teknisi FK)',
                 'role' => 'TEKNISI',
                 'must_change_password' => false,
             ],
@@ -237,6 +249,9 @@ class DummyDataSeeder extends Seeder
             ['user_id' => $userMap['kaur.gku']->id, 'building_id' => $locMap['REKTORAT']->id],
             ['user_id' => $userMap['teknisi.gku']->id, 'building_id' => $locMap['GKU']->id],
             ['user_id' => $userMap['teknisi.gku']->id, 'building_id' => $locMap['REKTORAT']->id],
+            // FK
+            ['user_id' => $userMap['kaur.fk']->id, 'building_id' => $locMap['FK']->id],
+            ['user_id' => $userMap['teknisi.fk']->id, 'building_id' => $locMap['FK']->id],
         ];
 
         foreach ($scopes as $scope) {
@@ -416,6 +431,7 @@ class DummyDataSeeder extends Seeder
                 ['ticket_no' => $def['ticket_no']],
                 [
                     'uuid' => (string) Str::uuid(),
+                    'title' => $def['title'] ?? $def['category']->name,
                     'reporter_id' => $def['reporter']->id,
                     'assigned_technician_id' => isset($def['assigned_technician']) ? $def['assigned_technician']->id : null,
                     'building_id' => $def['building']->id,

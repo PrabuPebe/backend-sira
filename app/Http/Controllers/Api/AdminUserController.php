@@ -21,6 +21,7 @@ class AdminUserController extends BaseApiController
         parameters: [
             new OA\Parameter(name: 'role', in: 'query', required: false, schema: new OA\Schema(type: 'string', enum: ['TEKNISI', 'ADMIN_UNIT', 'ADMIN_UNIV', 'PELAPOR'])),
             new OA\Parameter(name: 'search', in: 'query', required: false, schema: new OA\Schema(type: 'string')),
+            new OA\Parameter(name: 'per_page', in: 'query', required: false, schema: new OA\Schema(type: 'integer', default: 15)),
         ],
         responses: [
             new OA\Response(response: 200, description: 'Daftar pengguna berhasil diambil')
@@ -47,7 +48,8 @@ class AdminUserController extends BaseApiController
             });
         }
 
-        $users = $query->orderBy('full_name', 'asc')->paginate(15);
+        $perPage = min(max((int) $request->query('per_page', 15), 1), 100);
+        $users = $query->orderBy('full_name', 'asc')->paginate($perPage);
 
         return $this->getResponse($users, 'Daftar pengguna berhasil diambil', 200);
     }

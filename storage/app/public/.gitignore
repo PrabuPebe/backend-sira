@@ -1,2 +1,7 @@
 *
 !.gitignore
+!reports/
+!reports/photos/
+!reports/photos/dummy_damage.jpg
+!reports/proofs/
+!reports/proofs/dummy_proof.jpg

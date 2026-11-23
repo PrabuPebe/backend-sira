@@ -10,9 +10,16 @@ RUN apt-get update && apt-get install -y \
     curl \
     && docker-php-ext-install pdo pdo_pgsql pgsql bcmath zip \
     && a2dismod mpm_event mpm_worker || true \
-    && a2enmod mpm_prefork rewrite \
+    && a2enmod mpm_prefork rewrite headers \
     && echo "ServerName localhost" >> /etc/apache2/apache2.conf \
+    && echo "Header unset X-Powered-By" >> /etc/apache2/apache2.conf \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Configure custom PHP settings (turn off expose_php, increase upload limits)
+RUN echo "expose_php = Off" > /usr/local/etc/php/conf.d/custom.ini \
+    && echo "upload_max_filesize = 20M" >> /usr/local/etc/php/conf.d/custom.ini \
+    && echo "post_max_size = 25M" >> /usr/local/etc/php/conf.d/custom.ini \
+    && echo "memory_limit = 256M" >> /usr/local/etc/php/conf.d/custom.ini
 
 # Configure Apache DocumentRoot to Laravel public directory
 ENV APACHE_DOCUMENT_ROOT /var/www/html/public

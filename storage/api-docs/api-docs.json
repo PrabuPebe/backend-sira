@@ -41,6 +41,15 @@
                         "schema": {
                             "type": "string"
                         }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
                     }
                 ],
                 "responses": {
@@ -859,6 +868,16 @@
                         "schema": {
                             "type": "string",
                             "default": "true"
+                        }
+                    },
+                    {
+                        "name": "include_inactive",
+                        "in": "query",
+                        "description": "Sertakan gedung nonaktif (1 atau true)",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean",
+                            "default": false
                         }
                     }
                 ],

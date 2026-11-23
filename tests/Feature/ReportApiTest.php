@@ -602,4 +602,70 @@ class ReportApiTest extends TestCase
         $this->assertArrayHasKey('uuid', $item);
         $this->assertArrayNotHasKey('id', $item);
     }
+
+    public function test_assign_with_invalid_uuid_returns_422(): void
+    {
+        $kaurToken = $this->authenticateAs($this->kaur);
+
+        // Invalid UUID string format
+        $res = $this->withHeader('Authorization', 'Bearer ' . $kaurToken)
+            ->postJson('/api/reports/assign?uuid=invalid-report-uuid', [
+                'technician_uuid' => 'invalid-technician-uuid',
+            ]);
+
+        $res->assertStatus(422)
+            ->assertJsonValidationErrors(['report_uuid', 'technician_uuid']);
+
+        // Non-existent valid UUID format
+        $res2 = $this->withHeader('Authorization', 'Bearer ' . $kaurToken)
+            ->postJson('/api/reports/assign?uuid=00000000-0000-0000-0000-000000000000', [
+                'technician_uuid' => '11111111-1111-1111-1111-111111111111',
+            ]);
+
+        $res2->assertStatus(422)
+            ->assertJsonValidationErrors(['report_uuid', 'technician_uuid']);
+    }
+
+    public function test_public_feed_and_detail_always_include_is_liked(): void
+    {
+        $pelaporToken = $this->authenticateAs($this->pelapor);
+        $file = UploadedFile::fake()->image('public_test.jpg');
+        $createRes = $this->withHeader('Authorization', 'Bearer ' . $pelaporToken)
+            ->post('/api/reports', [
+                'building_uuid' => $this->gedungFti->uuid,
+                'room_name' => 'Ruang 2.1',
+                'category_uuid' => $this->category->uuid,
+                'description' => 'Test like',
+                'photo' => $file,
+            ], ['Accept' => 'application/json']);
+
+        $uuid = $createRes->json('data.uuid');
+
+        // Unauthenticated public feed
+        $unauthRes = $this->getJson('/api/reports/public');
+        $unauthRes->assertStatus(200);
+        $data = $unauthRes->json('data.data');
+        $this->assertNotEmpty($data);
+        $this->assertArrayHasKey('is_liked', $data[0]);
+        $this->assertFalse($data[0]['is_liked']);
+
+        // Like report
+        $this->withHeader('Authorization', 'Bearer ' . $pelaporToken)
+            ->postJson("/api/reports/like?uuid={$uuid}")
+            ->assertStatus(200);
+
+        // Authenticated public feed
+        $authRes = $this->withHeader('Authorization', 'Bearer ' . $pelaporToken)
+            ->getJson('/api/reports/public');
+        $authRes->assertStatus(200);
+        $item = collect($authRes->json('data.data'))->firstWhere('uuid', $uuid);
+        $this->assertNotNull($item);
+        $this->assertTrue($item['is_liked']);
+
+        // Detail show endpoint
+        $detailRes = $this->withHeader('Authorization', 'Bearer ' . $pelaporToken)
+            ->getJson("/api/reports/detail?uuid={$uuid}");
+        $detailRes->assertStatus(200);
+        $this->assertTrue($detailRes->json('data.is_liked'));
+    }
 }

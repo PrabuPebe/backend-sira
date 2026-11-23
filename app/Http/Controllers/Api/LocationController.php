@@ -18,6 +18,7 @@ class LocationController extends BaseApiController
             new OA\Parameter(name: 'search', in: 'query', required: false, schema: new OA\Schema(type: 'string')),
             new OA\Parameter(name: 'type', in: 'query', required: false, schema: new OA\Schema(type: 'string', enum: ['BUILDING', 'ROOM'])),
             new OA\Parameter(name: 'is_active', in: 'query', required: false, description: 'Filter status aktif: true, false, atau all', schema: new OA\Schema(type: 'string', default: 'true')),
+            new OA\Parameter(name: 'include_inactive', in: 'query', required: false, description: 'Sertakan gedung nonaktif (1 atau true)', schema: new OA\Schema(type: 'boolean', default: false)),
         ],
         responses: [
             new OA\Response(response: 200, description: 'Daftar lokasi berhasil diambil')
@@ -27,12 +28,15 @@ class LocationController extends BaseApiController
     {
         $query = Location::query();
 
-        $isActive = $request->query('is_active', 'true');
-        if ($isActive === 'true' || $isActive === '1') {
-            $query->where('is_active', true);
-        } elseif ($isActive === 'false' || $isActive === '0') {
-            $query->where('is_active', false);
-        } // if 'all', do not apply is_active filter
+        $includeInactive = $request->boolean('include_inactive') || $request->query('is_active') === 'all';
+        if (!$includeInactive) {
+            $isActive = $request->query('is_active', 'true');
+            if ($isActive === 'true' || $isActive === '1') {
+                $query->where('is_active', true);
+            } elseif ($isActive === 'false' || $isActive === '0') {
+                $query->where('is_active', false);
+            }
+        }
 
         if ($request->filled('type')) {
             $query->where('type', $request->query('type'));
@@ -112,11 +116,17 @@ class LocationController extends BaseApiController
 
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:150'],
-            'code' => ['nullable', 'string', 'max:30'],
-            'faculty' => ['nullable', 'string', 'max:100'],
-            'floor_count' => ['nullable', 'integer', 'min:1', 'max:100'],
+            'code' => ['required', 'string', 'max:30', 'unique:locations,code'],
+            'faculty' => ['required', 'string', 'max:100'],
+            'floor_count' => ['required', 'integer', 'min:1', 'max:100'],
             'type' => ['nullable', 'in:BUILDING,ROOM'],
             'parent_uuid' => ['nullable', 'string', 'exists:locations,uuid'],
+        ], [
+            'name.required' => 'Nama gedung wajib diisi',
+            'code.required' => 'Kode gedung wajib diisi',
+            'code.unique' => 'Kode gedung sudah digunakan',
+            'faculty.required' => 'Fakultas / unit gedung wajib diisi',
+            'floor_count.required' => 'Jumlah lantai gedung wajib diisi',
         ]);
 
         $parentId = null;
@@ -180,10 +190,12 @@ class LocationController extends BaseApiController
 
         $validated = $request->validate([
             'name' => ['sometimes', 'string', 'max:150'],
-            'code' => ['nullable', 'string', 'max:30'],
-            'faculty' => ['nullable', 'string', 'max:100'],
-            'floor_count' => ['nullable', 'integer', 'min:1', 'max:100'],
+            'code' => ['sometimes', 'string', 'max:30', 'unique:locations,code,' . $location->id],
+            'faculty' => ['sometimes', 'string', 'max:100'],
+            'floor_count' => ['sometimes', 'integer', 'min:1', 'max:100'],
             'is_active' => ['sometimes', 'boolean'],
+        ], [
+            'code.unique' => 'Kode gedung sudah digunakan',
         ]);
 
         $location->update($validated);
@@ -227,6 +239,6 @@ class LocationController extends BaseApiController
         }
 
         $location->update(['is_active' => false]);
-        return $this->deleteResponse('Gedung berhasil dinonaktifkan', 204);
+        return $this->deleteResponse('Gedung berhasil dinonaktifkan', 200, 200);
     }
 }
