@@ -22,7 +22,8 @@ if [ ! -f "storage/app/public/reports/proofs/dummy_proof.jpg" ]; then
     echo '/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=' | base64 -d > storage/app/public/reports/proofs/dummy_proof.jpg
 fi
 
-# Ensure public storage link exists
+# Ensure public storage link exists cleanly
+rm -rf public/storage
 php artisan storage:link || true
 
 chown -R www-data:www-data storage bootstrap/cache public/storage 2>/dev/null || true

@@ -28,13 +28,17 @@ class LocationController extends BaseApiController
     {
         $query = Location::query();
 
-        $includeInactive = $request->boolean('include_inactive') || $request->query('is_active') === 'all';
+        $includeInactive = $request->boolean('include_inactive') 
+            || $request->query('is_active') === 'all'
+            || $request->query('status') === 'all';
+
         if (!$includeInactive) {
-            $isActive = $request->query('is_active', 'true');
-            if ($isActive === 'true' || $isActive === '1') {
-                $query->where('is_active', true);
-            } elseif ($isActive === 'false' || $isActive === '0') {
+            $isActive = $request->query('is_active');
+            if ($isActive === 'false' || $isActive === '0') {
                 $query->where('is_active', false);
+            } else {
+                // Default: hanya tampilkan gedung aktif (untuk form pelaporan pelapor)
+                $query->where('is_active', true);
             }
         }
 
@@ -240,5 +244,63 @@ class LocationController extends BaseApiController
 
         $location->update(['is_active' => false]);
         return $this->deleteResponse('Gedung berhasil dinonaktifkan', 200, 200);
+    }
+
+    #[OA\Patch(
+        path: '/locations/status',
+        summary: 'Ubah status aktif/nonaktif gedung (Admin Universitas)',
+        tags: ['Location'],
+        parameters: [
+            new OA\Parameter(name: 'uuid', in: 'query', required: true, schema: new OA\Schema(type: 'string', format: 'uuid'))
+        ],
+        requestBody: new OA\RequestBody(
+            required: false,
+            content: new OA\JsonContent(
+                properties: [
+                    new OA\Property(property: 'is_active', type: 'boolean', example: true)
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 200, description: 'Status gedung berhasil diperbarui'),
+            new OA\Response(response: 403, description: 'Hanya Admin Universitas yang dapat mengelola gedung'),
+            new OA\Response(response: 404, description: 'Lokasi tidak ditemukan')
+        ]
+    )]
+    public function toggleStatus(Request $request): JsonResponse
+    {
+        if ($request->user()?->role !== 'ADMIN_UNIV') {
+            return $this->errorResponse('Hanya Admin Universitas yang dapat mengelola gedung', 403);
+        }
+
+        $uuid = (string) $request->query('uuid');
+        if (empty($uuid)) {
+            return $this->errorResponse('Query parameter uuid wajib diisi', 400);
+        }
+
+        $location = Location::where('uuid', $uuid)->first();
+        if (!$location) {
+            return $this->errorResponse('Lokasi tidak ditemukan', 404);
+        }
+
+        if ($request->has('is_active')) {
+            $newStatus = $request->boolean('is_active');
+        } else {
+            $newStatus = !$location->is_active;
+        }
+
+        // Cek jika dinonaktifkan dan memiliki laporan aktif
+        if (!$newStatus) {
+            $hasActiveReports = $location->reports()->whereIn('status', ['DITERIMA', 'DIPROSES'])->exists();
+            if ($hasActiveReports) {
+                $location->update(['is_active' => false]);
+                return $this->getResponse($location, 'Gedung memiliki laporan aktif sehingga dinonaktifkan (tidak dihapus)', 200);
+            }
+        }
+
+        $location->update(['is_active' => $newStatus]);
+        $statusMsg = $newStatus ? 'diaktifkan kembali' : 'dinonaktifkan';
+
+        return $this->getResponse($location, "Gedung berhasil {$statusMsg}", 200);
     }
 }

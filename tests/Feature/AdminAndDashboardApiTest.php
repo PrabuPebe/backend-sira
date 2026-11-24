@@ -404,5 +404,15 @@ class AdminAndDashboardApiTest extends TestCase
         $includeRes = $this->getJson('/api/locations?include_inactive=1');
         $includeRes->assertStatus(200);
         $this->assertNotNull(collect($includeRes->json('data'))->firstWhere('uuid', $newLocUuid));
+
+        // Reactivate location via PATCH /api/locations/status
+        $reactivateRes = $this->withHeader('Authorization', 'Bearer ' . $adminToken)
+            ->patchJson("/api/locations/status?uuid={$newLocUuid}", ['is_active' => true]);
+        $reactivateRes->assertStatus(200);
+        $this->assertTrue(Location::where('uuid', $newLocUuid)->value('is_active'));
+
+        // After reactivation, default index should include it again
+        $afterActiveRes = $this->getJson('/api/locations');
+        $this->assertNotNull(collect($afterActiveRes->json('data'))->firstWhere('uuid', $newLocUuid));
     }
 }
